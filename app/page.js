@@ -7,13 +7,12 @@ import { supabase, formatNumber, formatPct, formatDate, gradeColor } from '@/lib
 const PAGE_SIZE = 50;
 
 const SORT_OPTIONS = {
-  score:     { col: 'd.score',         defaultDir: 'desc' },
-  subs:      { col: 'c.subscribers',   defaultDir: 'desc' },
-  delta7d:   { col: 's.delta_7d_pct',  defaultDir: 'desc' },
-  delta30d:  { col: 's.delta_30d_pct', defaultDir: 'desc' },
-  views:     { col: 'c.views',         defaultDir: 'desc' },
-  videos:    { col: 'c.videos',        defaultDir: 'desc' },
-  name:      { col: 'c.name',          defaultDir: 'asc' },
+  subs:      { col: 'subscribers',     defaultDir: 'desc' },
+  views:     { col: 'views',           defaultDir: 'desc' },
+  videos:    { col: 'videos',          defaultDir: 'desc' },
+  name:      { col: 'name',            defaultDir: 'asc' },
+  lastseen:  { col: 'last_seen_at',    defaultDir: 'desc' },
+  firstseen: { col: 'first_seen_at',   defaultDir: 'desc' },
 };
 
 export default function Home() {
@@ -21,7 +20,7 @@ export default function Home() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [sort, setSort] = useState('score');
+  const [sort, setSort] = useState('subs');
   const [order, setOrder] = useState('desc');
   const [filters, setFilters] = useState({
     q: '', min_score: '', max_score: 100, min_subs: '', max_subs: '',
@@ -51,8 +50,8 @@ export default function Home() {
       if (filters.country) query = query.eq('country', filters.country);
       if (filters.category) query = query.eq('channel_type', filters.category);
 
-      const sortCol = SORT_OPTIONS[sort]?.col || 'c.subscribers';
-      query = query.order(sortCol.replace('c.', '').replace('s.', '').replace('d.', ''), { ascending: order === 'asc' });
+      const sortCol = SORT_OPTIONS[sort]?.col || 'subscribers';
+      query = query.order(sortCol, { ascending: order === 'asc' });
 
       const from = (page - 1) * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
