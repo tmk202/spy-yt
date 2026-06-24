@@ -155,17 +155,17 @@ export default function Home() {
 
       {/* Table */}
       <div className="card overflow-x-auto">
-        <table className="w-full" style={{ tableLayout: 'auto' }}>
+        <table className="w-full" style={{ tableLayout: 'fixed' }}>
           <colgroup>
-            <col style={{ width: '32%' }} />
-            <col style={{ width: '80px' }} />
-            <col style={{ width: '60px' }} />
-            <col style={{ width: '70px' }} />
-            <col style={{ width: '70px' }} />
-            <col style={{ width: '80px' }} />
+            <col style={{ width: '210px' }} />
             <col style={{ width: '60px' }} />
             <col style={{ width: '50px' }} />
-            <col style={{ width: '24%' }} />
+            <col style={{ width: '55px' }} />
+            <col style={{ width: '55px' }} />
+            <col style={{ width: '65px' }} />
+            <col style={{ width: '50px' }} />
+            <col style={{ width: '40px' }} />
+            <col style={{ width: '85px' }} />
           </colgroup>
           <thead>
             <tr>
@@ -175,7 +175,7 @@ export default function Home() {
               <th onClick={() => handleSort('subs')} className="text-right">
                 Subs {sort === 'subs' && <span className="arrow">{order === 'desc' ? '▼' : '▲'}</span>}
               </th>
-              <th>Grade</th>
+              <th>Grd</th>
               <th onClick={() => handleSort('lastseen')} className="text-right">
                 Δ7d {sort === 'lastseen' && <span className="arrow">{order === 'desc' ? '▼' : '▲'}</span>}
               </th>
@@ -187,20 +187,17 @@ export default function Home() {
                 Videos {sort === 'videos' && <span className="arrow">{order === 'desc' ? '▼' : '▲'}</span>}
               </th>
               <th>🌍</th>
-              <th>Last seen</th>
+              <th>Seen</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.channel_id}>
                 <td>
-                  <Link href={`/channel/?id=${r.channel_id}`} className="flex items-center gap-2 min-w-0">
-                    {r.avatar && <img src={r.avatar} alt="" className="w-5 h-5 rounded-full flex-shrink-0" />}
-                    <div className="min-w-0">
-                      <div className="font-medium truncate" title={r.name}>{r.name}</div>
-                      <div className="text-xs muted truncate" title={r.handle || r.channel_id}>
-                        {r.handle ? '@' + r.handle : r.channel_id}
-                      </div>
+                  <Link href={`/channel/?id=${r.channel_id}`} className="block min-w-0">
+                    <div className="font-medium truncate" title={r.name}>{r.name}</div>
+                    <div className="text-xs muted truncate" title={r.handle || r.channel_id}>
+                      {r.handle ? '@' + r.handle : r.channel_id.slice(0, 14)}
                     </div>
                   </Link>
                 </td>
@@ -211,7 +208,7 @@ export default function Home() {
                 <td className="text-right tabular-nums">{formatNumber(r.views)}</td>
                 <td className="text-right tabular-nums">{formatNumber(r.videos)}</td>
                 <td>{r.country || '—'}</td>
-                <td className="text-xs muted">{formatDate(r.last_seen_at)}</td>
+                <td className="text-xs muted">{formatDate(r.last_seen_at, '%m-%d')}</td>
               </tr>
             ))}
           </tbody>
