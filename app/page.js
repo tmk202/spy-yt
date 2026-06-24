@@ -26,7 +26,7 @@ export default function Home() {
   const [sort, setSort] = useState('score');
   const [order, setOrder] = useState('desc');
   const [filters, setFilters] = useState({
-    q: '', min_subs: '1000', max_subs: '100000',
+    q: '', min_subs: '', max_subs: '',
     country: '', niche: '',
   });
 
@@ -124,7 +124,7 @@ export default function Home() {
           </FilterField>
           <button
             className="btn"
-            onClick={() => setFilters({ q: '', min_subs: '1000', max_subs: '100000', country: '', niche: '' })}
+            onClick={() => setFilters({ q: '', min_subs: '', max_subs: '', country: '', niche: '' })}
           >
             Reset
           </button>
