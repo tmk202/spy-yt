@@ -20,10 +20,10 @@ export default function Home() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [sort, setSort] = useState('subs');
+  const [sort, setSort] = useState('lastseen');
   const [order, setOrder] = useState('desc');
   const [filters, setFilters] = useState({
-    q: '', min_score: '', max_score: 100, min_subs: '', max_subs: '',
+    q: '', min_score: '', max_score: 100, min_subs: '1000', max_subs: '100000',
     min_delta7d: '', max_delta7d: '', category: '', country: '',
   });
 
