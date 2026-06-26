@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { supabase, formatNumber, formatPct, gradeColor } from '@/lib/supabase';
 
 const PAGE_SIZE = 25;
+const STORAGE_KEY = 'spy_yt_starred_v1';
 
 const SORT_OPTIONS = {
   score:     { col: 'last_score',      defaultDir: 'desc', label: 'Score' },
@@ -27,8 +28,27 @@ export default function Home() {
   const [order, setOrder] = useState('desc');
   const [filters, setFilters] = useState({
     q: '', min_subs: '', max_subs: '',
-    country: '', niche: '',
+    country: '', niche: '', starred: false,
   });
+  const [starred, setStarred] = useState(new Set());
+
+  // Load starred IDs from localStorage on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) setStarred(new Set(arr));
+      }
+    } catch {}
+  }, []);
+
+  // Persist starred on change
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(starred)));
+    } catch {}
+  }, [starred]);
 
   useEffect(() => {
     fetchData();
@@ -53,6 +73,14 @@ export default function Home() {
       if (filters.max_subs) query = query.lte('subscribers', Number(filters.max_subs));
       if (filters.country) query = query.eq('country', filters.country);
       if (filters.niche) query = query.ilike('channel_type', `%${filters.niche}%`);
+      if (filters.starred) {
+        if (starred.size > 0) {
+          query = query.in('channel_id', Array.from(starred));
+        } else {
+          // No stars yet → empty result
+          setRows([]); setTotal(0); setLoading(false); return;
+        }
+      }
 
       const sortCol = SORT_OPTIONS[sort]?.col || 'last_score';
       // nullsLast for score (so nulls go to end when sorting desc)
@@ -86,6 +114,15 @@ export default function Home() {
   function setFilter(k, v) {
     setFilters({ ...filters, [k]: v });
     setPage(1);
+  }
+
+  function toggleStar(channelId) {
+    setStarred((prev) => {
+      const next = new Set(prev);
+      if (next.has(channelId)) next.delete(channelId);
+      else next.add(channelId);
+      return next;
+    });
   }
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
@@ -122,9 +159,18 @@ export default function Home() {
               value={filters.niche}
               onChange={(e) => setFilter('niche', e.target.value)} />
           </FilterField>
+          <label className="flex items-center gap-1 cursor-pointer h-[26px]">
+            <input
+              type="checkbox"
+              checked={filters.starred}
+              onChange={(e) => setFilter('starred', e.target.checked)}
+              className="accent-amber-400"
+            />
+            <span className="text-sm">⭐ Starred only ({starred.size})</span>
+          </label>
           <button
             className="btn"
-            onClick={() => setFilters({ q: '', min_subs: '', max_subs: '', country: '', niche: '' })}
+            onClick={() => setFilters({ q: '', min_subs: '', max_subs: '', country: '', niche: '', starred: false })}
           >
             Reset
           </button>
@@ -145,7 +191,8 @@ export default function Home() {
         <table className="w-full" style={{ tableLayout: 'fixed' }}>
           <colgroup>
             <col style={{ width: '36px' }} />
-            <col style={{ width: '46px' }} />
+            <col style={{ width: '32px' }} />
+            <col style={{ width: '36px' }} />
             <col style={{ width: 'auto' }} />
             <col style={{ width: '62px' }} />
             <col style={{ width: '64px' }} />
@@ -162,6 +209,7 @@ export default function Home() {
               <th onClick={() => handleSort('score')} className="text-right">
                 Score {sort === 'score' && <span className="arrow">{order === 'desc' ? '▼' : '▲'}</span>}
               </th>
+              <th className="text-center">⭐</th>
               <th className="muted text-right">#</th>
               <th onClick={() => handleSort('name')}>
                 Channel {sort === 'name' && <span className="arrow">{order === 'desc' ? '▼' : '▲'}</span>}
@@ -195,13 +243,24 @@ export default function Home() {
             {rows.map((r, i) => {
               const rowNum = startIdx + i + 1;
               const sbUrl = r.sb_path ? `https://socialblade.com/${r.sb_path}` : null;
+              const isStarred = starred.has(r.channel_id);
               return (
-                <tr key={r.channel_id}>
+                <tr key={r.channel_id} className={isStarred ? 'starred-row' : ''}>
                   {/* Score */}
                   <td className="text-right score-cell">
                     {r.last_score !== null && r.last_score !== undefined
                       ? r.last_score.toFixed(0)
                       : <span className="muted">—</span>}
+                  </td>
+                  {/* Star */}
+                  <td className="text-center">
+                    <button
+                      onClick={() => toggleStar(r.channel_id)}
+                      title={isStarred ? 'Bỏ star' : 'Star kênh này'}
+                      className="star-btn"
+                    >
+                      {isStarred ? '⭐' : '☆'}
+                    </button>
                   </td>
                   {/* # */}
                   <td className="text-right muted text-xs">{rowNum}</td>

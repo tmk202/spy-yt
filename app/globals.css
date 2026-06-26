@@ -177,6 +177,20 @@ table .tabular-nums { font-variant-numeric: tabular-nums; }
   text-overflow: ellipsis;
 }
 
+.star-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  line-height: 1;
+  color: #d1d5db;
+  transition: all 0.15s;
+}
+.star-btn:hover { color: #f59e0b; transform: scale(1.2); }
+tr.starred-row { background: #fffbeb; }
+tr.starred-row:hover { background: #fef3c7 !important; }
+
 .score-cell { font-weight: 600; color: var(--accent); }
 .green-text { color: var(--green); }
 .red-text { color: var(--red); }
